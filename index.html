@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TBM — The Screened Consultation Pipeline™</title>
+  <meta name="description" content="Pre-screened immigration consultations, booked automatically. The Screened Consultation Pipeline™ by The Ben Mount." />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <meta name="theme-color" content="#00311f" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#00311f",
+            "ink-2": "#002616",
+            "ink-3": "#001a0f",
+            "ink-card": "#003b25",
+            cream: "#fff3e6",
+            "cream-dim": "rgba(255, 243, 230, 0.62)",
+            "cream-mute": "rgba(255, 243, 230, 0.42)",
+            "cream-faint": "rgba(255, 243, 230, 0.10)",
+            gold: "#C9A84C",
+            live: "#7BD89F",
+          },
+          fontFamily: {
+            sans: ['Jost', 'system-ui', 'sans-serif'],
+            serif: ['"Cormorant Garamond"', 'serif'],
+            mono: ['Jost', 'system-ui', 'sans-serif'],
+            wordmark: ['"Cormorant Garamond"', 'serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --ink: #00311f;
+      --cream: #fff3e6;
+      --gold: #C9A84C;
+      --live: #7BD89F;
+    }
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #001a0f;
+      color: var(--cream);
+      font-family: 'Jost', system-ui, sans-serif;
+      font-feature-settings: "ss01", "ss02";
+    }
+    ::selection { background: var(--gold); color: var(--ink); }
+
+    /* Ambient background */
+    .page-bg {
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(70% 50% at 50% 0%, rgba(0, 60, 38, 0.55), transparent 70%),
+        radial-gradient(50% 40% at 50% 100%, rgba(201,168,76,0.06), transparent 70%),
+        linear-gradient(180deg, #001a0f 0%, #00120a 100%);
+      z-index: -2;
+    }
+
+    /* Grain */
+    .grain::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 0.95 0 0 0 0 0.9 0 0 0 0.32 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      opacity: 0.08;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Italic gold accent */
+    .italic-gold {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: -0.01em;
+    }
+    .italic-cream {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+    }
+
+    /* Wordmark */
+    .wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+    }
+
+    /* Reveal */
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 1.1s cubic-bezier(.16,.84,.27,1), transform 1.1s cubic-bezier(.16,.84,.27,1); }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .reveal[data-delay="1"] { transition-delay: .08s; }
+    .reveal[data-delay="2"] { transition-delay: .16s; }
+    .reveal[data-delay="3"] { transition-delay: .24s; }
+    .reveal[data-delay="4"] { transition-delay: .32s; }
+    .reveal[data-delay="5"] { transition-delay: .40s; }
+
+    /* Nav */
+    .nav-scrolled {
+      background: rgba(0, 26, 15, 0.78);
+      backdrop-filter: saturate(140%) blur(14px);
+      -webkit-backdrop-filter: saturate(140%) blur(14px);
+      border-bottom: 1px solid rgba(255, 243, 230, 0.06);
+    }
+
+    /* Eyebrow */
+    .eyebrow {
+      font-family: 'Jost', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,243,230,0.55);
+    }
+
+    /* Pill badge */
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(201,168,76,0.10), rgba(201,168,76,0.04));
+      border: 1px solid rgba(201,168,76,0.30);
+      font-family: 'Jost', sans-serif;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--cream);
+    }
+    .pill-badge .dot {
+      width: 6px; height: 6px; border-radius: 999px;
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold);
+    }
+
+    /* Primary CTA */
+    .btn-primary {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.95rem 1.6rem;
+      background: linear-gradient(180deg, #d6b85a, #b89540);
+      color: #1a1208;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      transition: transform .5s cubic-bezier(.16,.84,.27,1), box-shadow .5s ease, filter .3s ease;
+      box-shadow: 0 14px 30px -12px rgba(201,168,76,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+      box-shadow: 0 18px 40px -12px rgba(201,168,76,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .btn-primary .arrow { transition: transform .5s cubic-bezier(.16,.84,.27,1); }
+    .btn-primary:hover .arrow { transform: translateX(3px); }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: .55rem;
+      padding: .55rem 1rem;
+      border: 1px solid rgba(255,243,230,0.14);
+      border-radius: 999px;
+      color: var(--cream);
+      font-size: .78rem;
+      font-weight: 500;
+      transition: border-color .4s ease, background .4s ease;
+    }
+    .btn-ghost:hover { border-color: rgba(255,243,230,0.32); background: rgba(255,243,230,0.03); }
+
+    /* Card base */
+    .card-base {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,243,230,0.045), rgba(255,243,230,0.015));
+      border: 1px solid rgba(255,243,230,0.08);
+      border-radius: 18px;
+    }
+
+    /* Pillar card */
+    .pillar { transition: border-color .55s ease, background .55s ease, transform .55s cubic-bezier(.16,.84,.27,1); }
+    .pillar:hover {
+      border-color: rgba(201,168,76,0.28);
+      background: linear-gradient(180deg, rgba(255,243,230,0.06), rgba(201,168,76,0.025));
+    }
+    .pillar-letter {
+      width: 44px; height: 44px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(201,168,76,0.20), rgba(201,168,76,0.05));
+      border: 1px solid rgba(201,168,76,0.35);
+      color: var(--gold);
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    /* Cal.com embed wrapper */
+    .cal-wrap {
+      background: linear-gradient(180deg, rgba(255,243,230,0.04), rgba(255,243,230,0.015));
+      border: 1px solid rgba(255,243,230,0.10);
+      border-radius: 22px;
+      backdrop-filter: blur(6px);
+    }
+    /* Tighten Cal iframe corners */
+    #my-cal-inline-tbm-strategy-call iframe {
+      border-radius: 14px !important;
+    }
+
+    /* Calendar */
+    .cal {
+      background: linear-gradient(180deg, rgba(255,243,230,0.04), rgba(255,243,230,0.015));
+      border: 1px solid rgba(255,243,230,0.10);
+      border-radius: 22px;
+      backdrop-filter: blur(6px);
+    }
+    .cal-day {
+      aspect-ratio: 1 / 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+      color: rgba(255,243,230,0.85);
+      transition: background .35s ease, color .35s ease;
+      cursor: default;
+      position: relative;
+    }
+    .cal-day.muted { color: rgba(255,243,230,0.22); }
+    .cal-day.today::after {
+      content: '';
+      position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 999px; background: var(--gold);
+    }
+    .cal-day.avail {
+      background: rgba(201,168,76,0.10);
+      color: var(--cream);
+      cursor: pointer;
+    }
+    .cal-day.avail:hover { background: rgba(201,168,76,0.20); }
+    .cal-day.selected {
+      background: var(--gold);
+      color: #1a1208;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .cal-weekday {
+      font-family: 'Jost', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      color: rgba(255,243,230,0.42);
+      text-transform: uppercase;
+      text-align: center;
+      padding: 8px 0;
+    }
+    .cal-month-tag {
+      font-family: 'Jost', sans-serif;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      color: var(--gold);
+      text-transform: uppercase;
+      display: block;
+      line-height: 1;
+      margin-top: 1px;
+    }
+
+    /* Time slot */
+    .slot {
+      width: 100%;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(255,243,230,0.025);
+      border: 1px solid rgba(255,243,230,0.06);
+      font-size: 13.5px;
+      color: var(--cream);
+      transition: background .35s ease, border-color .35s ease;
+      cursor: pointer;
+    }
+    .slot:hover {
+      background: rgba(201,168,76,0.08);
+      border-color: rgba(201,168,76,0.30);
+    }
+    .slot .live-dot {
+      width: 7px; height: 7px; border-radius: 999px;
+      background: var(--live);
+      box-shadow: 0 0 8px rgba(123, 216, 159, 0.7);
+      flex-shrink: 0;
+    }
+
+    .toggle {
+      display: inline-flex; padding: 3px;
+      border-radius: 999px;
+      background: rgba(255,243,230,0.05);
+      border: 1px solid rgba(255,243,230,0.06);
+      font-family: 'Jost', sans-serif;
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+    }
+    .toggle .t { padding: 5px 10px; border-radius: 999px; color: rgba(255,243,230,0.5); }
+    .toggle .t.active { background: rgba(255,243,230,0.10); color: var(--cream); }
+
+    /* Guarantee */
+    .guarantee {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(80% 100% at 50% 0%, rgba(201,168,76,0.10), transparent 60%),
+        linear-gradient(180deg, rgba(255,243,230,0.05), rgba(255,243,230,0.02));
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 22px;
+    }
+
+    /* Pulse */
+    @keyframes pulseDot { 0% { box-shadow: 0 0 0 0 rgba(201,168,76,0.6);} 100% { box-shadow: 0 0 0 10px rgba(201,168,76,0);} }
+    .pulse-dot { animation: pulseDot 2s ease-out infinite; }
+    @keyframes pulseLive { 0% { box-shadow: 0 0 0 0 rgba(123,216,159,0.55);} 100% { box-shadow: 0 0 0 8px rgba(123,216,159,0);} }
+    .live-pulse { animation: pulseLive 2s ease-out infinite; }
+
+    /* Underline link */
+    .ulink { position: relative; }
+    .ulink::after {
+      content: '';
+      position: absolute; left: 0; right: 0; bottom: -3px;
+      height: 1px; background: currentColor;
+      transform: scaleX(0); transform-origin: right;
+      transition: transform .55s cubic-bezier(.16,.84,.27,1);
+    }
+    .ulink:hover::after { transform: scaleX(1); transform-origin: left; }
+
+    /* Mobile CTA */
+    .mobile-cta { transform: translateY(120%); transition: transform .6s cubic-bezier(.16,.84,.27,1); }
+    .mobile-cta.show { transform: translateY(0); }
+
+    /* No scrollbar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="grain">
+  <div class="page-bg"></div>
+
+  <!-- NAV -->
+  <header id="nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <a href="#top" class="flex items-center gap-3">
+        <img src="logo.svg" alt="The Ben Mount" class="w-9 h-9 sm:w-10 sm:h-10" />
+        <span class="hidden sm:inline wordmark text-cream text-[13px]">The Ben Mount</span>
+      </a>
+      <a href="https://thebenmount.com/strategy" class="btn-ghost">
+        <span class="w-1.5 h-1.5 rounded-full bg-gold pulse-dot"></span>
+        Strategy Session
+      </a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="top" class="relative pt-32 sm:pt-40 pb-12 sm:pb-16">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+
+      <div class="reveal flex justify-center">
+        <span class="pill-badge">
+          <span class="dot"></span>
+          For Immigration Consultants &amp; Firms
+        </span>
+      </div>
+
+      <h1 class="reveal mt-8" data-delay="1" style="font-size: clamp(2.4rem, 6.8vw, 5rem); line-height: 0.98; letter-spacing: -0.045em; font-weight: 700;">
+        Pre-Screened<br/>
+        <span class="italic-gold" style="font-size: 1.05em;">Immigration Consultations</span><br/>
+        Booked Automatically.
+      </h1>
+
+      <p class="reveal mt-7 text-cream-dim text-lg sm:text-xl" data-delay="2">
+        Qualified consultations <span class="italic-cream text-cream">— not wasted calls.</span>
+      </p>
+
+      <p class="reveal mt-3 text-cream-mute text-sm sm:text-base max-w-xl mx-auto" data-delay="3">
+        Try the <span class="text-cream font-medium tracking-tight">S.C.A.L.E</span> case-specific acquisition system.
+        <span class="italic-cream block sm:inline mt-1 sm:mt-0 sm:ml-1 text-cream-dim">Completely DFY.</span>
+      </p>
+
+      <h2 class="reveal mt-16 sm:mt-20" data-delay="4" style="font-size: clamp(1.5rem, 3.4vw, 2rem); line-height: 1.1; letter-spacing: -0.03em; font-weight: 600;">
+        Pick a time that <span class="italic-gold">works for you</span>
+      </h2>
+
+      <!-- Cal.com inline embed (themed) -->
+      <div class="reveal mt-10" data-delay="5">
+        <div class="cal-wrap p-2 sm:p-3">
+          <div class="flex items-center justify-between px-3 sm:px-4 pt-1 pb-3">
+            <div class="flex items-center gap-2.5 text-xs text-cream-mute font-mono tracking-widest">
+              <span class="w-1.5 h-1.5 rounded-full bg-live live-pulse"></span>
+              LIVE AVAILABILITY · 30 MIN
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-[11px] text-cream-mute font-mono tracking-widest">
+              <span>POWERED BY CAL</span>
+            </div>
+          </div>
+
+          <div
+            id="my-cal-inline-tbm-strategy-call"
+            style="width:100%; min-height:680px; border-radius:14px; overflow:hidden;"
+          ></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SYSTEM -->
+  <section id="system" class="relative py-24 sm:py-32">
+    <div class="max-w-3xl mx-auto px-6">
+
+      <div class="text-center mb-12 sm:mb-16">
+        <div class="reveal eyebrow">The System</div>
+        <h2 class="reveal mt-4" data-delay="1" style="font-size: clamp(2rem, 4.8vw, 3.4rem); line-height: 1.02; letter-spacing: -0.04em; font-weight: 700;">
+          How <span class="italic-gold">S.C.A.L.E</span> works<br/>for you
+        </h2>
+        <p class="reveal mt-5 max-w-xl mx-auto text-cream-dim leading-relaxed" data-delay="2">
+          Five pillars engineered to fill your calendar with pre-screened, case-specific consultations <span class="italic-cream text-cream">— hands-free.</span>
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="card-base pillar reveal p-5 sm:p-6 flex items-start gap-5">
+          <span class="pillar-letter">S</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-semibold tracking-tight">Screened on Intake</h3>
+            <p class="mt-1.5 text-sm text-cream-dim leading-relaxed">Every prospect filtered by eligibility, budget and timeline <span class="italic-cream text-cream">before</span> a calendar invite is ever sent.</p>
+          </div>
+        </div>
+
+        <div class="card-base pillar reveal p-5 sm:p-6 flex items-start gap-5" data-delay="1">
+          <span class="pillar-letter">C</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-semibold tracking-tight">Case-Category Targeting</h3>
+            <p class="mt-1.5 text-sm text-cream-dim leading-relaxed">Skilled worker, spousal, investor, study, humanitarian — each with its own creative, audience and intent profile.</p>
+          </div>
+        </div>
+
+        <div class="card-base pillar reveal p-5 sm:p-6 flex items-start gap-5" data-delay="2">
+          <span class="pillar-letter">A</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-semibold tracking-tight">Authority Funnels (Bilingual)</h3>
+            <p class="mt-1.5 text-sm text-cream-dim leading-relaxed">EN · FR · ES native funnels that build trust in the prospect's language — not a translated afterthought.</p>
+          </div>
+        </div>
+
+        <div class="card-base pillar reveal p-5 sm:p-6 flex items-start gap-5" data-delay="3">
+          <span class="pillar-letter">L</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-semibold tracking-tight">Launched Compliance-Safe</h3>
+            <p class="mt-1.5 text-sm text-cream-dim leading-relaxed">Creative reviewed against RCIC, OISC and ad-platform policy. No guarantees, no misrepresentation, no account risk.</p>
+          </div>
+        </div>
+
+        <div class="card-base pillar reveal p-5 sm:p-6 flex items-start gap-5" data-delay="4">
+          <span class="pillar-letter">E</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-semibold tracking-tight">Evolved Nurture (30–90d)</h3>
+            <p class="mt-1.5 text-sm text-cream-dim leading-relaxed">A long-cycle touch sequence that converts <span class="italic-cream text-cream">"thinking about it"</span> into ready-to-retain — without manual follow-up.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUARANTEE / CTA -->
+  <section id="cta" class="relative py-20 sm:py-28">
+    <div class="max-w-2xl mx-auto px-6">
+      <div class="guarantee p-8 sm:p-12 text-center reveal">
+
+        <div class="flex justify-center">
+          <div class="relative w-14 h-14 flex items-center justify-center">
+            <svg viewBox="0 0 56 56" class="absolute inset-0 w-full h-full" fill="none">
+              <path d="M28 4 L48 12 L48 28 C48 40 39 48 28 52 C17 48 8 40 8 28 L8 12 Z"
+                    stroke="rgba(201,168,76,0.55)" stroke-width="1.4" fill="rgba(201,168,76,0.06)"/>
+              <path d="M18 28 L25 35 L38 22"
+                    stroke="#C9A84C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <h2 class="reveal mt-7" data-delay="1" style="font-size: clamp(1.5rem, 3.4vw, 2.1rem); line-height: 1.15; letter-spacing: -0.03em; font-weight: 700;">
+          If your consultations aren't <span class="italic-gold">pre-screened &amp; qualified</span><br/>
+          every week with The Pipeline —
+        </h2>
+
+        <p class="reveal mt-4 text-cream-dim text-base sm:text-lg" data-delay="2">
+          we keep working until they are. <span class="italic-cream text-cream">No retainer roulette.</span>
+        </p>
+
+        <div class="reveal mt-9" data-delay="3">
+          <a href="https://thebenmount.com/strategy" class="btn-primary">
+            Book My Free Strategy Call
+            <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="reveal mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-cream-mute text-[11px] font-mono tracking-widest" data-delay="4">
+          <span>30 MINUTES</span>
+          <span class="text-gold">·</span>
+          <span>NO PITCH</span>
+          <span class="text-gold">·</span>
+          <span>ONE FIRM / MARKET</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative pt-10 pb-16 border-t border-cream-faint">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <div class="flex flex-col items-center gap-3 mb-5">
+        <img src="logo.svg" alt="The Ben Mount" class="w-14 h-14" />
+        <span class="wordmark text-cream text-[13px]">The Ben Mount</span>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-cream-dim mb-6">
+        <a href="#system" class="ulink hover:text-cream transition-colors">System</a>
+        <a href="#cta" class="ulink hover:text-cream transition-colors">Strategy Session</a>
+        <a href="mailto:ben@thebenmount.com" class="ulink hover:text-cream transition-colors">ben@thebenmount.com</a>
+      </div>
+
+      <div class="text-[11px] tracking-[0.22em] uppercase font-medium text-cream-mute">
+        © 2026 The Ben Mount · All Rights Reserved
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile sticky CTA -->
+  <div id="mobileCta" class="mobile-cta fixed bottom-4 left-4 right-4 z-40 md:hidden">
+    <a href="https://thebenmount.com/strategy" class="btn-primary w-full justify-center">
+      Schedule Strategy Session
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </div>
+
+  <script>
+    const nav = document.getElementById('nav');
+    const mobileCta = document.getElementById('mobileCta');
+    const onScroll = () => {
+      if (window.scrollY > 24) nav.classList.add('nav-scrolled');
+      else nav.classList.remove('nav-scrolled');
+      if (window.scrollY > 600) mobileCta.classList.add('show');
+      else mobileCta.classList.remove('show');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+    // Cal.com inline embed — themed dark with TBM gold accent
+    (function (C, A, L) {
+      let p = function (a, ar) { a.q.push(ar); };
+      let d = C.document;
+      C.Cal = C.Cal || function () {
+        let cal = C.Cal; let ar = arguments;
+        if (!cal.loaded) {
+          cal.ns = {}; cal.q = cal.q || [];
+          d.head.appendChild(d.createElement("script")).src = A;
+          cal.loaded = true;
+        }
+        if (ar[0] === L) {
+          const api = function () { p(api, arguments); };
+          const namespace = ar[1];
+          api.q = api.q || [];
+          if (typeof namespace === "string") {
+            cal.ns[namespace] = cal.ns[namespace] || api;
+            p(cal.ns[namespace], ar);
+            p(cal, ["initNamespace", namespace]);
+          } else p(cal, ar);
+          return;
+        }
+        p(cal, ar);
+      };
+    })(window, "https://app.cal.com/embed/embed.js", "init");
+
+    Cal("init", "tbm-strategy-call", { origin: "https://app.cal.com" });
+
+    Cal.ns["tbm-strategy-call"]("inline", {
+      elementOrSelector: "#my-cal-inline-tbm-strategy-call",
+      config: { layout: "month_view", useSlotsViewOnSmallScreen: "true" },
+      calLink: "ben-mount-sqvgmb/tbm-strategy-call",
+    });
+
+    Cal.ns["tbm-strategy-call"]("ui", {
+      hideEventTypeDetails: false,
+      layout: "month_view",
+      theme: "dark",
+      styles: {
+        branding: { brandColor: "#C9A84C" }
+      },
+      cssVarsPerTheme: {
+        dark: {
+          "cal-bg": "#001a0f",
+          "cal-bg-emphasis": "#00311f",
+          "cal-bg-muted": "#002616",
+          "cal-bg-subtle": "rgba(255,243,230,0.04)",
+          "cal-border": "rgba(255,243,230,0.10)",
+          "cal-border-subtle": "rgba(255,243,230,0.06)",
+          "cal-border-emphasis": "rgba(201,168,76,0.30)",
+          "cal-text": "#fff3e6",
+          "cal-text-emphasis": "#fff3e6",
+          "cal-text-muted": "rgba(255,243,230,0.62)",
+          "cal-text-subtle": "rgba(255,243,230,0.42)",
+          "cal-brand": "#C9A84C",
+          "cal-brand-emphasis": "#d6b85a",
+          "cal-brand-text": "#1a1208"
+        }
+      }
+    });
+  </script>
+</body>
+</html>
